@@ -168,7 +168,7 @@ app.post('/api/v1/attendees', (req, res) => {
     id: getNextAttendeeId(),
     name: name.trim(),
     email: email.trim(),
-    eventId: []
+    eventIds: []
   };
   
   attendees.push(new_attendee);
