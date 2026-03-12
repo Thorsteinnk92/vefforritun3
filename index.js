@@ -143,29 +143,34 @@ export default app;
 
 
 
-app.post('api/v1/attendees', (req, res) => {
+app.post('/api/v1/attendees', (req, res) => {
 
+  
+  const {name, email} = req.body;
+  
+  if (!name || !email) {
+    return res.status(400).json({message: "Name and location are missing"})
+  }
+  
+  if (!email.includes("@")) {
+    return res.status(400).json({message: "Email must contain @ signal"})
+  }
+  
+  const duplicate = attendees.find(a => 
+    a.email.toLowerCase() === email.trim().toLowerCase()
+  );
+
+  if(duplicate) {
+    return res.status(400).json({message: "Email is already in use"})
+  }
+  
+  const new_attendee = {
+    id: getNextAttendeeId(),
+    name: name.trim(),
+    email: email.trim(),
+    eventId: []
+  };
+  
+  attendees.push(new_attendee);
+  return res.status(201).json(new_attendee)
 })
-
-const {name, email} = req.body;
-
-if (!name || !email) {
-  return res.status(400).json({message: "Name and location are missing"})
-}
-
-if (!email.includes("@")) {
-  return res.status(400).json({message: "Email must contain @ signal"})
-}
-
-const duplicate = attendees.find(a => 
-  a.name.toLowerCase() === name.trim().toLowerCase()
-);
-
-const new_attendee = {
-  id: getNextAttendeeId(),
-  name: name.trim(),
-  location: email.trim()
-};
-
-attendees.push(new_attendee);
-return res.status(201).json(new_attendee)
