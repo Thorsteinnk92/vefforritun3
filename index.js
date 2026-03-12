@@ -134,3 +134,70 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 export default app;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.post('api/v1/attendees', (req, res) => {
+
+})
+
+const {name, email} = req.body;
+
+if (!name || !location) {
+  return res.status(400).json({message: "Name and location are missing"})
+}
+
+const duplicate = attendees.find(a => 
+  a.name.toLowerCase() === name.trim().toLowerCase()
+);
+
+const new_attendee = {
+  id: getNextAttendeeId(),
+  name: name.trim(),
+  location: location.trim()
+};
+
+attendees.push(new_attendee);
+return res.status(201).json(new_attendee)
