@@ -143,50 +143,18 @@ export default app;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.post('api/v1/attendees', (req, res) => {
 
 })
 
 const {name, email} = req.body;
 
-if (!name || !location) {
+if (!name || !email) {
   return res.status(400).json({message: "Name and location are missing"})
+}
+
+if (!email.includes("@")) {
+  return res.status(400).json({message: "Email must contain @ signal"})
 }
 
 const duplicate = attendees.find(a => 
@@ -196,7 +164,7 @@ const duplicate = attendees.find(a =>
 const new_attendee = {
   id: getNextAttendeeId(),
   name: name.trim(),
-  location: location.trim()
+  location: email.trim()
 };
 
 attendees.push(new_attendee);
