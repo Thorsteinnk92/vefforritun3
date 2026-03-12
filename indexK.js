@@ -127,7 +127,7 @@ app.post('/api/v1/events',  (req, res) => {
   //get data from body
   const { name, location, date} = req.body
 
-  //check fields whether exists and are non-empty
+  //check fields whether they exist and are non-empty
   if (!name || !location || !date) {
     return res.status(400).json({message: 'name, location and date are required'})
   };
@@ -150,6 +150,7 @@ app.post('/api/v1/events',  (req, res) => {
     return res.status(400).json({ message: 'Event already exists' });
   }
 
+  //create new event
   const newEvent = {
     id: getNextEventId(),
     name: trimmedName,
@@ -157,6 +158,7 @@ app.post('/api/v1/events',  (req, res) => {
     date: trimmedDate
   };
 
+  //add new event to array
   events.push(newEvent);
 
   return res.status(200).json(newEvent);
