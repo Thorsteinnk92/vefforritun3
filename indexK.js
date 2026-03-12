@@ -161,7 +161,7 @@ app.post('/api/v1/events',  (req, res) => {
   //add new event to array
   events.push(newEvent);
 
-  return res.status(200).json(newEvent);
+  return res.status(201).json(newEvent);
 
 });
 
