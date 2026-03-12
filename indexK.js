@@ -173,6 +173,43 @@ app.get('/api/v1/attendees',  (req, res) => {
   return res.status(200).json(attendees);
 });
 
+app.post('/api/v1/attendees', (req, res) => {
+  const {name, email} = req.body;
+  
+  if (!name || !email) {
+    return res.status(400).json({message: "Name and location are missing"})
+  }
+  
+  if (!email.includes("@")) {
+    return res.status(400).json({message: "Email must contain @ signal"})
+  }
+  
+  const duplicate = attendees.find(a => 
+    a.email.toLowerCase() === email.trim().toLowerCase()
+  );
+
+  if(duplicate) {
+    return res.status(400).json({message: "Email is already in use"})
+  }
+  
+  const new_attendee = {
+    id: getNextAttendeeId(),
+    name: name.trim(),
+    email: email.trim(),
+    eventIds: []
+  };
+  
+  attendees.push(new_attendee);
+  return res.status(201).json(new_attendee)
+})
+
+app.post("/api/v1/attendees/:attendeeId/events/:eventId", (req, res)=> {
+
+  if(!eventId || !attendeID) {
+    return res.status(400).json({message: "Missing Id's"})
+  }
+
+});
 /* --------------------------
 
       SERVER INITIALIZATION  
