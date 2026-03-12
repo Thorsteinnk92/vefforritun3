@@ -105,6 +105,11 @@ app.get('/api/v1/events',  (req, res) => {
   return res.status(200).json(results);
 });
 
+app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
+  const attendeeCount = attendees.filter(a => a.eventIds.includes(req.eventId)).length;
+  return res.status(200).json({ ...req.event, attendeeCount})
+});
+
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
@@ -114,7 +119,18 @@ app.get('/api/v1/attendees',  (req, res) => {
   return res.status(200).json(attendees);
 });
 
-app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
-  const attendeeCount = attendees.filter(a => a.eventIds.includes(req.eventId)).length;
-  return res.status(200).json({ ...req.event, attendeeCount})
-});
+/* --------------------------
+
+      SERVER INITIALIZATION  
+      
+!! DO NOT REMOVE OR CHANGE THE FOLLOWING (IT HAS TO BE AT THE END OF THE FILE) !!
+      
+-------------------------- */
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+  });
+}
+
+export default app;
