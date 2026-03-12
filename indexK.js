@@ -72,6 +72,19 @@ const ensureEventExists = (req, res, next) => {
   next();
 };
 
+const validateDateFormat = (date) => {
+  const dateFormat = /^\d{4}-\d{2}-\d{2}$/;
+  return dateFormat.test(date)
+};
+
+const ensureNoDuplicate = (name, location, date) => {
+  return events.find(e => 
+    e.name.toLowerCase() === name.toLowerCase() &&
+    e.location.toLowerCase() === location.toLowerCase() &&
+    e.date === date
+  );
+};
+
 
 /* --------------------------
 
@@ -110,11 +123,52 @@ app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res
   return res.status(200).json({ ...req.event, attendeeCount})
 });
 
+app.post('/api/v1/events',  (req, res) => {
+  //get data from body
+  const { name, location, date} = req.body
+
+  //check fields whether exists and are non-empty
+  if (!name || !location || !date) {
+    return res.status(400).json({message: 'name, location and date are required'})
+  };
+
+  //trim name, date, location
+  const trimmedName = name.trim();
+  const trimmedLocation = location.trim();
+  const trimmedDate = date.trim();
+
+  //check if fields are blank after trimming
+  if (!trimmedName || !trimmedLocation || !trimmedDate) {
+    return res.status(400).json({message: 'fields cannot be blank'})
+  };
+
+  if (!validateDateFormat(trimmedDate)) {
+    return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format'})
+  }
+
+  if (ensureNoDuplicate(trimmedDate, trimmedLocation, trimmedName)) {
+    return res.status(400).json({ message: 'Event already exists' });
+  }
+
+  const newEvent = {
+    id: getNextEventId(),
+    name: trimmedName,
+    location: trimmedLocation,
+    date: trimmedDate
+  };
+
+  events.push(newEvent);
+
+  return res.status(200).json(newEvent);
+
+});
+
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
 
 -------------------------- */
+
 app.get('/api/v1/attendees',  (req, res) => {
   return res.status(200).json(attendees);
 });
