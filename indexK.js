@@ -118,3 +118,19 @@ app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res
 app.get('/api/v1/attendees',  (req, res) => {
   return res.status(200).json(attendees);
 });
+
+/* --------------------------
+
+      SERVER INITIALIZATION  
+      
+!! DO NOT REMOVE OR CHANGE THE FOLLOWING (IT HAS TO BE AT THE END OF THE FILE) !!
+      
+-------------------------- */
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+  });
+}
+
+export default app;
