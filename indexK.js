@@ -105,6 +105,11 @@ app.get('/api/v1/events',  (req, res) => {
   return res.status(200).json(results);
 });
 
+app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
+  const attendeeCount = attendees.filter(a => a.eventIds.includes(req.eventId)).length;
+  return res.status(200).json({ ...req.event, attendeeCount})
+});
+
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
@@ -112,9 +117,4 @@ app.get('/api/v1/events',  (req, res) => {
 -------------------------- */
 app.get('/api/v1/attendees',  (req, res) => {
   return res.status(200).json(attendees);
-});
-
-app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
-  const attendeeCount = attendees.filter(a => a.eventIds.includes(req.eventId)).length;
-  return res.status(200).json({ ...req.event, attendeeCount})
 });
