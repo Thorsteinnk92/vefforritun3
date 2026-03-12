@@ -174,3 +174,11 @@ app.post('/api/v1/attendees', (req, res) => {
   attendees.push(new_attendee);
   return res.status(201).json(new_attendee)
 })
+
+app.post("/api/v1/attendees/:attendeeId/events/:eventId", (req, res)=> {
+
+  if(!eventId || !attendeID) {
+    return res.status(400).json({message: "Missing Id's"})
+  }
+
+});
