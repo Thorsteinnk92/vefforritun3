@@ -88,7 +88,7 @@ const ensureNoDuplicate = (name, location, date) => {
 const checkExistingattendees = (req, res, next) => {
   const find_attendees = attendees.filter(a => a.eventIds.includes(req.eventId));
   if (find_attendees.length > 0) {
-    return res.status(405).json({message: "Method not allowed"})
+    return res.status(400).json({message: "Method not allowed"})
   };
     next()
   }
@@ -204,9 +204,7 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
   return res.status(200).json(req.event);
 });
 
-app.delete("/api/v1/events/:eventId", (req,res) => {
-  const eventId = parseId(req.params.eventId);
-events.find(e => e.id === eventId) 
+app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (req,res) => {
 
   
 })
