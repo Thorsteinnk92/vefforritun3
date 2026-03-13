@@ -135,14 +135,16 @@ app.post('/api/v1/events', (req, res) => {
   //get data from body
   const { name, location, date } = req.body
 
+  if (typeof name !== 'string' || typeof location !== 'string', typeof date !== 'string') {
+    return res.status(400).json({ message: 'Name, location and date are required to be of type string' })
+  }
+
   //check fields whether they exist and are non-empty
   if (!name || !location || !date) {
     return res.status(400).json({ message: 'name, location and date are required' })
   };
 
-  if (typeof name !== 'string' || typeof location !== 'string', typeof date !== 'string') {
-    return res.status(400).json({ message: 'Name, location and date are required to be of type string'})
-  }
+
 
   //trim name, date, location
   const trimmedName = name.trim();
@@ -158,7 +160,7 @@ app.post('/api/v1/events', (req, res) => {
     return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format' })
   };
 
-  if (ensureNoDuplicate(name, location, date)) {
+  if (ensureNoDuplicate(trimmedName, trimmedLocation, trimmedDate)) {
     return res.status(400).json({ message: 'Event already exists' })
   };
 
@@ -224,7 +226,7 @@ app.delete("/api/v1/events/:eventId", validateEventId, ensureEventExists, checkE
 });
 
 app.delete('/api/v1/events', (req, res) => {
-  return res.status(405).json({ message: 'Method not allowed'})
+  return res.status(405).json({ message: 'Method not allowed' })
 });
 
 /* --------------------------
