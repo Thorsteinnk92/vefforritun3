@@ -140,6 +140,10 @@ app.post('/api/v1/events', (req, res) => {
     return res.status(400).json({ message: 'name, location and date are required' })
   };
 
+  if (typeof name !== 'string' || typeof location !== 'string', typeof date !== 'string') {
+    return res.status(400).json({ message: 'Name, location and date are required to be of type string'})
+  }
+
   //trim name, date, location
   const trimmedName = name.trim();
   const trimmedLocation = location.trim();
@@ -152,11 +156,13 @@ app.post('/api/v1/events', (req, res) => {
 
   if (!validateDateFormat(trimmedDate)) {
     return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format' })
-  }
+  };
 
   if (ensureNoDuplicate(name, location, date)) {
-    return res.status(400).json({ message: 'Event already exists' });
-  }
+    return res.status(400).json({ message: 'Event already exists' })
+  };
+
+
 
   //create new event
   const newEvent = {
