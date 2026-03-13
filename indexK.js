@@ -165,6 +165,17 @@ app.post('/api/v1/events',  (req, res) => {
 
 });
 
+app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
+  const { name, location, date } = req.body
+
+  
+  
+
+
+
+  return res.status(200).json({ message: 'Event patched'});
+});
+
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
