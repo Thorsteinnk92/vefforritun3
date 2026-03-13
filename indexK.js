@@ -53,8 +53,9 @@ const parseId = (value) => {
 const validateEventId = (req, res, next) => {
   const eventId = parseId(req.params.eventId);
   if (!eventId) {
-    return res.status(400).json({message: "Event ID invalid, must be positive integer"
-      
+    return res.status(400).json({
+      message: "Event ID invalid, must be positive integer"
+
     });
   }
   req.eventId = eventId;
@@ -78,7 +79,7 @@ const validateDateFormat = (date) => {
 };
 
 const ensureNoDuplicate = (name, location, date) => {
-  return events.find(e => 
+  return events.find(e =>
     e.name.toLowerCase() === name.toLowerCase() &&
     e.location.toLowerCase() === location.toLowerCase() &&
     e.date === date
@@ -88,10 +89,10 @@ const ensureNoDuplicate = (name, location, date) => {
 const checkExistingattendees = (req, res, next) => {
   const find_attendees = attendees.filter(a => a.eventIds.includes(req.eventId));
   if (find_attendees.length > 0) {
-    return res.status(400).json({message: "Method not allowed"})
+    return res.status(400).json({ message: "Method not allowed" })
   };
-    next()
-  }
+  next()
+}
 
 /* --------------------------
 
@@ -100,7 +101,7 @@ const checkExistingattendees = (req, res, next) => {
 -------------------------- */
 
 
-app.get('/api/v1/events',  (req, res) => {
+app.get('/api/v1/events', (req, res) => {
   const allowedParams = ['name', 'location'];
   const receivedParams = Object.keys(req.query);
 
@@ -127,16 +128,16 @@ app.get('/api/v1/events',  (req, res) => {
 
 app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
   const attendeeCount = attendees.filter(a => a.eventIds.includes(req.eventId)).length;
-  return res.status(200).json({ ...req.event, attendeeCount})
+  return res.status(200).json({ ...req.event, attendeeCount })
 });
 
-app.post('/api/v1/events',  (req, res) => {
+app.post('/api/v1/events', (req, res) => {
   //get data from body
-  const { name, location, date} = req.body
+  const { name, location, date } = req.body
 
   //check fields whether they exist and are non-empty
   if (!name || !location || !date) {
-    return res.status(400).json({message: 'name, location and date are required'})
+    return res.status(400).json({ message: 'name, location and date are required' })
   };
 
   //trim name, date, location
@@ -146,11 +147,11 @@ app.post('/api/v1/events',  (req, res) => {
 
   //check if fields are blank after trimming
   if (!trimmedName || !trimmedLocation || !trimmedDate) {
-    return res.status(400).json({message: 'fields cannot be blank'})
+    return res.status(400).json({ message: 'fields cannot be blank' })
   };
 
   if (!validateDateFormat(trimmedDate)) {
-    return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format'})
+    return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format' })
   }
 
   if (ensureNoDuplicate(name, location, date)) {
@@ -176,7 +177,7 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
   const { name, location, date } = req.body
   //check if at least one field is inserted
   if (!name && !location && !date) {
-    return res.status(400).json({ message: 'At least one field is required'})
+    return res.status(400).json({ message: 'At least one field is required' })
   };
   // if only name is inserted, trimm the name and add to event
   if (name) {
@@ -204,9 +205,9 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
   return res.status(200).json(req.event);
 });
 
-app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (req,res) => {
+app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (req, res) => {
   return res.status(200).json({ message: 'delete works' })
-  
+
 })
 /* --------------------------
 
@@ -214,31 +215,31 @@ app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (
 
 -------------------------- */
 
-app.get('/api/v1/attendees',  (req, res) => {
+app.get('/api/v1/attendees', (req, res) => {
   return res.status(200).json(attendees);
 });
 
 //Create a new attendee
 
 app.post('/api/v1/attendees', (req, res) => {
-  
-  const {name, email} = req.body;
-  
+
+  const { name, email } = req.body;
+
   //Ensures the request most contain both name and email in the proper format
   if (!name || !email) {
-    return res.status(400).json({message: "Name and email are missing"})
+    return res.status(400).json({ message: "Name and email are missing" })
   }
-  
+
   if (!email.includes("@")) {
-    return res.status(400).json({message: "Email must contain @ signal"})
+    return res.status(400).json({ message: "Email must contain @ signal" })
   }
-  
-  const duplicate = attendees.find(a => 
+
+  const duplicate = attendees.find(a =>
     a.email.toLowerCase() === email.trim().toLowerCase()
   );
-  
-  if(duplicate) {
-    return res.status(400).json({message: "Email is already in use"})
+
+  if (duplicate) {
+    return res.status(400).json({ message: "Email is already in use" })
   }
 
   //Generates a new Id for attendee and cleans up whitespace
@@ -253,31 +254,31 @@ app.post('/api/v1/attendees', (req, res) => {
   return res.status(201).json(new_attendee)
 })
 
-app.post("/api/v1/attendees/:attendeeId/events/:eventId", (req, res)=> {
+app.post("/api/v1/attendees/:attendeeId/events/:eventId", (req, res) => {
   //Makes sure that both Id's are in integer form
   const attendeeId = parseId(req.params.attendeeId);
   const eventId = parseId(req.params.eventId);
-  
+
   //Validates if any Id's are missing
-  if(!eventId || !attendeeId) {
-    return res.status(400).json({message: "Missing Id's"})
+  if (!eventId || !attendeeId) {
+    return res.status(400).json({ message: "Missing Id's" })
   }
   //Checks if attendee exists at all
-const attendee = attendees.find(a => a.id === attendeeId);
-if (!attendee) {
-  return res.status(404).json({message: "Attendee not found"});
-}
- //Checks if event exists
-const event = events.find(e => e.id === eventId);
-if (!event) {
-  return res.status(404).json({message: "Event not found"});
-}
+  const attendee = attendees.find(a => a.id === attendeeId);
+  if (!attendee) {
+    return res.status(404).json({ message: "Attendee not found" });
+  }
+  //Checks if event exists
+  const event = events.find(e => e.id === eventId);
+  if (!event) {
+    return res.status(404).json({ message: "Event not found" });
+  }
   //Checks if the current attendee is already signed up for event
-if (attendee.eventIds.includes(eventId)) {
-  return res.status(400).json({message: "Attendee is already registered for event"});
-}
-// Modifies the event to include a particular attendee
-attendee.eventIds.push(eventId);
+  if (attendee.eventIds.includes(eventId)) {
+    return res.status(400).json({ message: "Attendee is already registered for event" });
+  }
+  // Modifies the event to include a particular attendee
+  attendee.eventIds.push(eventId);
   return res.status(200).json(attendee);
 });
 /* --------------------------
