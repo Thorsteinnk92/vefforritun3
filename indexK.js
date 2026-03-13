@@ -59,7 +59,7 @@ const validateEventId = (req, res, next) => {
   }
   req.eventId = eventId;
   next();
-}
+};
 
 const ensureEventExists = (req, res, next) => {
   const event = events.find(e => e.id === req.eventId);
