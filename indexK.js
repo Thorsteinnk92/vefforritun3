@@ -168,12 +168,31 @@ app.post('/api/v1/events',  (req, res) => {
 app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
   const { name, location, date } = req.body
 
+  if (!name && !location && !date) {
+    return res.status(400).json({ message: 'At least one field is required'})
+  };
   
-  
+  if (name) {
+    const trimmedName = name.trim();
+    if (trimmedName) {
+      req.event.name = trimmedName
+    }
+  };
+  if (location) {
+    const trimmedLocation = location.trim()
+    if (trimmedLocation) {
+      req.event.location = trimmedLocation
+    }
+  };
+  if (date) {
+    const trimmedDate = date.trim()
+    if (!validateDateFormat(trimmedDate)) {
+      return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format' })
+    }
+    req.event.date = trimmedDate
+  };
 
-
-
-  return res.status(200).json({ message: 'Event patched'});
+  return res.status(200).json(req.event);
 });
 
 /* --------------------------
