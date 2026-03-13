@@ -205,11 +205,22 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
   return res.status(200).json(req.event);
 });
 
-app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (req, res) => {
-  
-  return res.status(200).json({ message: 'delete works' })
+app.delete("/api/v1/events/:eventId", validateEventId, ensureEventExists, checkExistingattendees, (req, res) => {
+  // create variable to be able to return the deleted event
+  const deletedEvent = req.event;
+  // find the event by id and delete only that event with splice
+  const eventIndex = events.findIndex(e => e.id === req.eventId);
+  events.splice(eventIndex, 1);
 
-})
+
+  return res.status(200).json(deletedEvent);
+
+});
+
+app.delete('/api/v1/events', (req, res) => {
+  return res.status(405).json({ message: 'Method not allowed'})
+});
+
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
