@@ -206,6 +206,7 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
 });
 
 app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (req, res) => {
+  
   return res.status(200).json({ message: 'delete works' })
 
 })
