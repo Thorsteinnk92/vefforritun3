@@ -141,15 +141,15 @@ export default app;
 
 
 
-
+//Create a new attendee
 
 app.post('/api/v1/attendees', (req, res) => {
-
   
   const {name, email} = req.body;
   
+  //Ensures the request most contain both name and email in the proper format
   if (!name || !email) {
-    return res.status(400).json({message: "Name and location are missing"})
+    return res.status(400).json({message: "Name and email are missing"})
   }
   
   if (!email.includes("@")) {
@@ -159,26 +159,47 @@ app.post('/api/v1/attendees', (req, res) => {
   const duplicate = attendees.find(a => 
     a.email.toLowerCase() === email.trim().toLowerCase()
   );
-
+  
   if(duplicate) {
     return res.status(400).json({message: "Email is already in use"})
   }
-  
+
+  //Generates a new Id for attendee and cleans up whitespace
   const new_attendee = {
     id: getNextAttendeeId(),
     name: name.trim(),
     email: email.trim(),
     eventIds: []
   };
-  
+  //pushes new attendee onto the attendee array if successful
   attendees.push(new_attendee);
   return res.status(201).json(new_attendee)
 })
 
 app.post("/api/v1/attendees/:attendeeId/events/:eventId", (req, res)=> {
-
-  if(!eventId || !attendeID) {
+  //Makes sure that both Id's are in integer form
+  const attendeeId = parseId(req.params.attendeeId);
+  const eventId = parseId(req.params.eventId);
+  
+  //Validates if any Id's are missing
+  if(!eventId || !attendeeId) {
     return res.status(400).json({message: "Missing Id's"})
   }
-
+  //Checks if attendee exists at all
+const attendee = attendees.find(a => a.id === attendeeId);
+if (!attendee) {
+  return res.status(404).json({message: "Attendee not found"});
+}
+ //Checks if event exists
+const event = events.find(e => e.id === eventId);
+if (!event) {
+  return res.status(404).json({message: "Event not found"});
+}
+  //Checks if the current attendee is already signed up for event
+if (attendee.eventIds.includes(eventId)) {
+  return res.status(400).json({message: "Attendee is already registered for event"});
+}
+// Modifies the event to include a particular attendee
+attendee.eventIds.push(eventId);
+  return res.status(200).json(attendee);
 });
