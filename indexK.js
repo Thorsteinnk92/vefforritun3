@@ -85,6 +85,12 @@ const ensureNoDuplicate = (name, location, date) => {
   );
 };
 
+const checkExistingattendees = (req, res, next) => {
+  const find_attendees = attendees.filter(a.eventIds.includes(req.eventId));
+  if (find_attendees.length > 0) {
+    return res.status(405).json({message: "Method not allowed"})
+  }
+  }
 
 /* --------------------------
 
