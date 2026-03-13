@@ -135,7 +135,7 @@ app.post('/api/v1/events', (req, res) => {
   //get data from body
   const { name, location, date } = req.body
 
-  if (typeof name !== 'string' || typeof location !== 'string', typeof date !== 'string') {
+  if (typeof name !== 'string' || typeof location !== 'string' || typeof date !== 'string') {
     return res.status(400).json({ message: 'Name, location and date are required to be of type string' })
   }
 
@@ -183,6 +183,17 @@ app.post('/api/v1/events', (req, res) => {
 
 app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
   const { name, location, date } = req.body
+
+  if (name !== undefined && typeof name !== 'string') {
+    return res.status(400).json({ message: 'Name must be a string' })
+  }
+  if (location !== undefined && typeof location !== 'string') {
+    return res.status(400).json({ message: 'Location must be a string' })
+  }
+  if (date !== undefined && typeof date !== 'string') {
+    return res.status(400).json({ message: 'Date must be a string' })
+  }
+
   //check if at least one field is inserted
   if (!name && !location && !date) {
     return res.status(400).json({ message: 'At least one field is required' })
