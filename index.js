@@ -59,7 +59,7 @@ const validateEventId = (req, res, next) => {
   }
   req.eventId = eventId;
   next();
-}
+};
 
 const ensureEventExists = (req, res, next) => {
   const event = events.find(e => e.id === req.eventId);
@@ -72,6 +72,26 @@ const ensureEventExists = (req, res, next) => {
   next();
 };
 
+const validateDateFormat = (date) => {
+  const dateFormat = /^\d{4}-\d{2}-\d{2}$/;
+  return dateFormat.test(date)
+};
+
+const ensureNoDuplicate = (name, location, date) => {
+  return events.find(e => 
+    e.name.toLowerCase() === name.toLowerCase() &&
+    e.location.toLowerCase() === location.toLowerCase() &&
+    e.date === date
+  );
+};
+
+const checkExistingattendees = (req, res, next) => {
+  const find_attendees = attendees.filter(a => a.eventIds.includes(req.eventId));
+  if (find_attendees.length > 0) {
+    return res.status(400).json({message: "Method not allowed"})
+  };
+    next()
+  }
 
 /* --------------------------
 
@@ -110,36 +130,93 @@ app.get('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res
   return res.status(200).json({ ...req.event, attendeeCount})
 });
 
+app.post('/api/v1/events',  (req, res) => {
+  //get data from body
+  const { name, location, date} = req.body
+
+  //check fields whether they exist and are non-empty
+  if (!name || !location || !date) {
+    return res.status(400).json({message: 'name, location and date are required'})
+  };
+
+  //trim name, date, location
+  const trimmedName = name.trim();
+  const trimmedLocation = location.trim();
+  const trimmedDate = date.trim();
+
+  //check if fields are blank after trimming
+  if (!trimmedName || !trimmedLocation || !trimmedDate) {
+    return res.status(400).json({message: 'fields cannot be blank'})
+  };
+
+  if (!validateDateFormat(trimmedDate)) {
+    return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format'})
+  }
+
+  if (ensureNoDuplicate(name, location, date)) {
+    return res.status(400).json({ message: 'Event already exists' });
+  }
+
+  //create new event
+  const newEvent = {
+    id: getNextEventId(),
+    name: trimmedName,
+    location: trimmedLocation,
+    date: trimmedDate
+  };
+
+  //add new event to array
+  events.push(newEvent);
+
+  return res.status(201).json(newEvent);
+
+});
+
+app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
+  const { name, location, date } = req.body
+  //check if at least one field is inserted
+  if (!name && !location && !date) {
+    return res.status(400).json({ message: 'At least one field is required'})
+  };
+  // if only name is inserted, trimm the name and add to event
+  if (name) {
+    const trimmedName = name.trim();
+    if (trimmedName) {
+      req.event.name = trimmedName
+    }
+  };
+  //if only location is inserted, trimm the string and add
+  if (location) {
+    const trimmedLocation = location.trim()
+    if (trimmedLocation) {
+      req.event.location = trimmedLocation
+    }
+  };
+  //if only date is inserted, trimm date, check for correct format and add
+  if (date) {
+    const trimmedDate = date.trim()
+    if (!validateDateFormat(trimmedDate)) {
+      return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format' })
+    }
+    req.event.date = trimmedDate
+  };
+
+  return res.status(200).json(req.event);
+});
+
+app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (req,res) => {
+  return res.status(200).json({ message: 'delete works' })
+  
+})
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
 
 -------------------------- */
+
 app.get('/api/v1/attendees',  (req, res) => {
   return res.status(200).json(attendees);
 });
-
-/* --------------------------
-
-      SERVER INITIALIZATION  
-      
-!! DO NOT REMOVE OR CHANGE THE FOLLOWING (IT HAS TO BE AT THE END OF THE FILE) !!
-      
--------------------------- */
-
-if (process.env.NODE_ENV !== "test") {
-  app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-  });
-}
-
-export default app;
-
-
-
-
-
-
 
 //Create a new attendee
 
@@ -203,3 +280,18 @@ if (attendee.eventIds.includes(eventId)) {
 attendee.eventIds.push(eventId);
   return res.status(200).json(attendee);
 });
+/* --------------------------
+
+      SERVER INITIALIZATION  
+      
+!! DO NOT REMOVE OR CHANGE THE FOLLOWING (IT HAS TO BE AT THE END OF THE FILE) !!
+      
+-------------------------- */
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+  });
+}
+
+export default app;
