@@ -89,7 +89,7 @@ const ensureNoDuplicate = (name, location, date) => {
 const checkExistingattendees = (req, res, next) => {
   const find_attendees = attendees.filter(a => a.eventIds.includes(req.eventId));
   if (find_attendees.length > 0) {
-    return res.status(400).json({ message: "Method not allowed" })
+    return res.status(400).json({ message: "Cannot delete event with registered attendees" })
   };
   next()
 }
@@ -135,16 +135,14 @@ app.post('/api/v1/events', (req, res) => {
   //get data from body
   const { name, location, date } = req.body
 
-  if (typeof name !== 'string' || typeof location !== 'string' || typeof date !== 'string') {
-    return res.status(400).json({ message: 'Name, location and date are required to be of type string' })
-  }
-
   //check fields whether they exist and are non-empty
   if (!name || !location || !date) {
     return res.status(400).json({ message: 'name, location and date are required' })
   };
-
-
+  
+  if (typeof name !== 'string' || typeof location !== 'string' || typeof date !== 'string') {
+    return res.status(400).json({ message: 'Name, location and date are required to be of type string' })
+  }
 
   //trim name, date, location
   const trimmedName = name.trim();
@@ -163,8 +161,6 @@ app.post('/api/v1/events', (req, res) => {
   if (ensureNoDuplicate(trimmedName, trimmedLocation, trimmedDate)) {
     return res.status(400).json({ message: 'Event already exists' })
   };
-
-
 
   //create new event
   const newEvent = {
@@ -199,27 +195,32 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
     return res.status(400).json({ message: 'At least one field is required' })
   };
   // if only name is inserted, trimm the name and add to event
-  if (name) {
-    const trimmedName = name.trim();
-    if (trimmedName) {
-      req.event.name = trimmedName
-    }
-  };
-  //if only location is inserted, trimm the string and add
-  if (location) {
-    const trimmedLocation = location.trim()
-    if (trimmedLocation) {
-      req.event.location = trimmedLocation
-    }
-  };
-  //if only date is inserted, trimm date, check for correct format and add
-  if (date) {
-    const trimmedDate = date.trim()
-    if (!validateDateFormat(trimmedDate)) {
-      return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format' })
-    }
-    req.event.date = trimmedDate
-  };
+if (name) {
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    return res.status(400).json({ message: 'name cannot be blank' });
+  }
+  req.event.name = trimmedName;
+}
+
+if (location) {
+  const trimmedLocation = location.trim();
+  if (!trimmedLocation) {
+    return res.status(400).json({ message: 'location cannot be blank' });
+  }
+  req.event.location = trimmedLocation;
+}
+  
+if (date) {
+  const trimmedDate = date.trim();
+  if (!trimmedDate) {
+    return res.status(400).json({ message: 'date cannot be blank' }); 
+  }
+  if (!validateDateFormat(trimmedDate)) {
+    return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format' });
+  }
+  req.event.date = trimmedDate;
+};
 
   return res.status(200).json(req.event);
 });
@@ -257,9 +258,12 @@ app.post('/api/v1/attendees', (req, res) => {
   const { name, email } = req.body;
 
   //Ensures the request most contain both name and email in the proper format
-  if (!name || !email) {
-    return res.status(400).json({ message: "Name and email are missing" })
-  }
+if (!name || !email) {
+  return res.status(400).json({ message: "name and email are required" });
+}
+if (typeof name !== 'string' || typeof email !== 'string') {
+  return res.status(400).json({ message: "name and email must be strings" });
+}
 
   if (!email.includes("@")) {
     return res.status(400).json({ message: "Email must contain @ signal" })
@@ -285,15 +289,18 @@ app.post('/api/v1/attendees', (req, res) => {
   return res.status(201).json(new_attendee)
 })
 
-app.post("/api/v1/attendees/:attendeeId/events/:eventId", (req, res) => {
+app.patch("/api/v1/attendees/:attendeeId/events/:eventId", (req, res) => {
   //Makes sure that both Id's are in integer form
   const attendeeId = parseId(req.params.attendeeId);
   const eventId = parseId(req.params.eventId);
 
   //Validates if any Id's are missing
-  if (!eventId || !attendeeId) {
-    return res.status(400).json({ message: "Missing Id's" })
-  }
+if (!attendeeId) {
+  return res.status(400).json({ message: "Attendee ID invalid, must be positive integer" });
+}
+if (!eventId) {
+  return res.status(400).json({ message: "Event ID invalid, must be positive integer" });
+}
   //Checks if attendee exists at all
   const attendee = attendees.find(a => a.id === attendeeId);
   if (!attendee) {
