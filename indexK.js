@@ -195,6 +195,12 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
   return res.status(200).json(req.event);
 });
 
+app.delete("/api/v1/events/:eventId", (req,res) => {
+  const eventId = parseId(req.params.eventId);
+events.find(e => e.id === eventId) 
+
+const attendeeDelete = attendees.filter(a => a.eventIds.includes(req.eventId));
+
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
