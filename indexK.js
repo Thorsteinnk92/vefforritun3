@@ -173,23 +173,25 @@ app.post('/api/v1/events',  (req, res) => {
 
 app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, res) => {
   const { name, location, date } = req.body
-
+  //check if at least one field is inserted
   if (!name && !location && !date) {
     return res.status(400).json({ message: 'At least one field is required'})
   };
-  
+  // if only name is inserted, trimm the name and add to event
   if (name) {
     const trimmedName = name.trim();
     if (trimmedName) {
       req.event.name = trimmedName
     }
   };
+  //if only location is inserted, trimm the string and add
   if (location) {
     const trimmedLocation = location.trim()
     if (trimmedLocation) {
       req.event.location = trimmedLocation
     }
   };
+  //if only date is inserted, trimm date, check for correct format and add
   if (date) {
     const trimmedDate = date.trim()
     if (!validateDateFormat(trimmedDate)) {
@@ -205,7 +207,8 @@ app.delete("/api/v1/events/:eventId", (req,res) => {
   const eventId = parseId(req.params.eventId);
 events.find(e => e.id === eventId) 
 
-)
+const attendeeDelete = attendees.filter(a => a.eventIds.includes(req.eventId));
+})
 /* --------------------------
 
     ATTENDEES ENDPOINTS    
