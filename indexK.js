@@ -153,7 +153,7 @@ app.post('/api/v1/events',  (req, res) => {
     return res.status(400).json({ message: 'Date must be in YYYY-MM-DD format'})
   }
 
-  if (ensureNoDuplicate(trimmedDate, trimmedLocation, trimmedName)) {
+  if (ensureNoDuplicate(name, location, date)) {
     return res.status(400).json({ message: 'Event already exists' });
   }
 
@@ -205,7 +205,7 @@ app.patch('/api/v1/events/:eventId', validateEventId, ensureEventExists, (req, r
 });
 
 app.delete("/api/v1/events/:eventId", checkExistingattendees, validateEventId, (req,res) => {
-
+  return res.status(200).json({ message: 'delete works' })
   
 })
 /* --------------------------
